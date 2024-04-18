@@ -1,8 +1,13 @@
-\documentclass[article,pdftex,shortnames,nojss]{jss}
+\documentclass[11pt]{article}
 
+\usepackage{fullpage}
 \usepackage{amsmath,amssymb}
 \usepackage{bbm} % for \mathbbm{1}
 \graphicspath{{figure/}}
+
+\usepackage{natbib}
+\bibliographystyle{apalike}
+%\usepackage{url}
 
 \usepackage{framed}
 \usepackage[labelsep=endash]{caption}
@@ -16,6 +21,12 @@
     \setcounter{figure}{\thetempFigure}
     \stepcounter{Figcount}
     }
+
+\newcommand\proglang[1]{\textsf{#1}}
+\newcommand\code[1]{\texttt{#1}}
+\newcommand\pkg[1]{\texttt{#1}}
+\newcommand\E{\mathsf{E}}
+\newcommand\Prob{\mathsf{P}}
 
 \newcommand\spatPomp{spatPomp}
 
@@ -229,68 +240,13 @@ library("knitr")
 library("kableExtra")
 @
 
-\author{Kidus Asfaw\\Univ. of Michigan \And
-        Joonha Park\\Univ. of Kansas \And
-        Aaron A. King\\Univ. of Michigan \And
-        Edward L. Ionides\\Univ. of Michigan}
-\Plainauthor{Kidus Asfaw, Joonha Park, Aaron A. King and Edward L. Ionides}
+\author{Kidus Asfaw$^1$, Joonha Park$^2$, Aaron A. King$^1$ and Edward L. Ionides$^{1*}$\\
+\vspace{2mm}
+\small{$^1$University of Michigan, $^2$University of Kansas, $^*$correspondence to \texttt{ionides@umich.edu} } }
 
-\title{Partially observed Markov processes with spatial structure via the \proglang{R} package \pkg{spatPomp}\\}
-\Plaintitle{Spatially Coupled Partially Observed Markov Processes via the R Package spatPomp}
-\Shorttitle{\pkg{{\spatPomp}}: Spatially Coupled Partially Observed Markov Processes in \proglang{R}}
+\title{A tutorial on spatiotemporal partially observed Markov process models via the R package spatPomp}
 
-
-\Abstract{
-We introduce a computational framework for modeling and statistical inference on high-dimensional dynamic systems.
-Our primary motivation is the investigation of metapopulation dynamics arising from a collection of spatially distributed, interacting biological populations.
-To make progress on this goal, we embed it in a more general problem: inference for a collection of interacting partially observed nonlinear non-Gaussian stochastic processes.
-Each process in the collection is called a unit;
-in the case of spatiotemporal models, the units correspond to distinct spatial locations.
-The dynamic state for each unit may be discrete or continuous, scalar or vector valued.
-In metapopulation applications, the state can represent a structured population or the abundances of a collection of species at a single location.
-We consider models where the collection of states has a Markov property.
-A sequence of noisy measurements is made on each unit, resulting in a collection of time series.
-A model of this form is called a spatiotemporal partially observed Markov process (SpatPOMP).
-The \proglang{R} package \pkg{\spatPomp} provides an environment for implementing SpatPOMP models, analyzing data using existing methods, and developing new inference approaches.
-Our presentation of \pkg{\spatPomp} reviews various methodologies in a unifying notational framework.
-We demonstrate the package on a simple Gaussian system and on a nontrivial epidemiological model for measles transmission within and between cities.
-We show how to construct user-specified SpatPOMP models within \pkg{\spatPomp}.
-
-\vspace{3mm}
-
-\noindent
-This version was compiled on {\today} using \pkg{spatPomp} \Sexpr{packageVersion("spatPomp")} with \pkg{pomp} \Sexpr{packageVersion("pomp")} and \proglang{R} \Sexpr{paste0(R.version$major,".",R.version$minor)} from source code at \code{https://github.com/ionides/spatPomp-article}.
-It is provided under the Creative Commons Attribution License. 
-}
-
-\Keywords{Markov processes, hidden Markov model, state space model, stochastic dynamical system, maximum likelihood, plug-and-play, spatiotemporal data, mechanistic model, sequential Monte Carlo, \proglang{R}}
-\Plainkeywords{Markov processes, hidden Markov model, state space model, stochastic dynamical system, maximum likelihood, plug-and-play, spatiotemporal data, mechanistic model, sequential Monte Carlo, R}
-
-\Address{
-  Kidus Asfaw, Edward L. Ionides\\
-  University of Michigan\\
-  48109 Michigan, United States of America\\
-  E-mail: \email{kasfaw@umich.edu}, \email{ionides@umich.edu}\\
-  URL: \url{https://www.stat.lsa.umich.edu/~ionides/}\\
-
-  Joonha Park\\
-  Department of Mathematics\\
-  University of Kansas\\
-  66045 Kansas, United States of America\\
-  E-mail: \email{j.park@ku.edu}\\
-  URL: \url{https://people.ku.edu/~j139p002}\\
-
-  Aaron A. King\\
-  Department of Ecology \& Evolutionary Biology\\
-  Center for the Study of Complex Systems\\
-  University of Michigan\\
-  48109 Michigan, United States of America\\
-  E-mail: \email{kingaa@umich.edu}\\
-  URL: \url{https://kinglab.eeb.lsa.umich.edu/}\\
-
-
-}
-
+\date{}
 
 <<set-opts,include=F,cache=F,purl=F>>=
 
@@ -314,8 +270,8 @@ opts_chunk$set(
     comment="",
     error=TRUE,
     echo=TRUE,
-    cache=FALSE,  ### SET CACHE TO TRUE WHILE EDITING TEXT
-#    cache=TRUE,  ### SET CACHE TO FALSE WHILE DEBUGGING CODE
+#    cache=FALSE,  ### SET CACHE TO TRUE WHILE EDITING TEXT
+    cache=TRUE,  ### SET CACHE TO FALSE WHILE DEBUGGING CODE
     strip.white=TRUE,
     results="markup",
     background="#FFFFFF00",
@@ -368,13 +324,38 @@ mysignif <- function (x, digits = 1) {
 
 \begin{document}
 
+\maketitle
+
+\begin{abstract}
+We describe a computational framework for modeling and statistical inference on high-dimensional stochastic dynamic systems.
+Our primary motivation is the investigation of metapopulation dynamics arising from a collection of spatially distributed, interacting biological populations.
+To make progress on this goal, we embed it in a more general problem: inference for a collection of interacting partially observed nonlinear non-Gaussian stochastic processes.
+Each process in the collection is called a unit;
+in the case of spatiotemporal models, the units correspond to distinct spatial locations.
+The dynamic state for each unit may be discrete or continuous, scalar or vector valued.
+In metapopulation applications, the state can represent a structured population or the abundances of a collection of species at a single location.
+We consider models where the collection of states has a Markov property.
+A sequence of noisy measurements is made on each unit, resulting in a collection of time series.
+A model of this form is called a spatiotemporal partially observed Markov process (SpatPOMP).
+The \proglang{R} package \pkg{\spatPomp} provides an environment for implementing SpatPOMP models, analyzing data using existing methods, and developing new inference approaches.
+Our presentation of \pkg{\spatPomp} reviews various methodologies in a unifying notational framework.
+We demonstrate the package on a simple Gaussian system and on a nontrivial epidemiological model for measles transmission within and between cities.
+We show how to construct user-specified SpatPOMP models within \pkg{\spatPomp}.
+
+\vspace{3mm}
+
+\noindent
+This version was compiled on {\today} using \pkg{spatPomp} \Sexpr{packageVersion("spatPomp")} with \pkg{pomp} \Sexpr{packageVersion("pomp")} and \proglang{R} \Sexpr{paste0(R.version$major,".",R.version$minor)}. Source code for this article is at \code{https://github.com/ionides/spatPomp-article}.
+Materials are provided under the Creative Commons Attribution License. 
+
+\end{abstract}
+
 \section{Introduction}
 
 A spatiotemporal partially observed Markov process (SpatPOMP) model consists of incomplete and noisy measurements of a latent Markov process having spatial as well as temporal structure.
 A SpatPOMP model is a special case of a vector-valued partially observed Markov process (POMP) where the latent states and the measurements are indexed by a collection of spatial locations known as units.
 Many biological, social and physical systems have the spatiotemporal structure, dynamic stochasticity and imperfect observability that characterize SpatPOMP models.
-This paper describes the \pkg{spatPomp} package \citep{R:spatPomp}, available for \proglang{R} \citep{R} from the Comprehensive R Archive Network (CRAN).
-The objective of the \pkg{\spatPomp} package is to facilitate model development and data analysis in the context of the general class of SpatPOMP models, enabling scientists to separate the scientific task of model development from the statistical task of providing inference tools.
+This paper discusses investigation of SpatPOMP models using the \pkg{spatPomp} software package \citep{R:spatPomp}, written in \proglang{R} \citep{R}.
 
 Modeling and inference for spatiotemporal dynamics has long been considered a central challenge in ecology and epidemiology.
 \citet{bjornstad01} identified six challenges of data analysis for ecological and epidemiological dynamics: (i) combining measurement noise and process noise; (ii) including covariates in mechanistically plausible ways; (iii) continuous time models; (iv) modeling and estimating interactions in coupled systems; (v) dealing with unobserved variables; (vi) spatiotemporal models.
@@ -462,7 +443,8 @@ Modern plug-and-play algorithms can provide statistically efficient likelihood-b
 The computational cost of plug-and-play methods may be considerable, due to the large number of simulations involved.
 Nevertheless, the practical utility of plug-and-play methods for POMP models has been amply demonstrated in scientific applications.
 In particular, plug-and-play methods implemented using \pkg{pomp} have facilitated various scientific investigations \citep[e.g.,][]{king08,bhadra11,shrestha11,shrestha13,earn12,roy13,blackwood13,blackwood13b,he13,breto14,blake14,martinez-bakker15,bakker16,becker16,buhnerkempe17,ranjeva17,marino19,pons-salort18,becker19,kain20,stocks20}.
-The \pkg{spatPomp} package has been used to develop and demonstrate plug-and-play methodology for SpatPOMP models \citep{ionides21,ionides22} and scientific applications of these methods are anticipated.
+The \pkg{spatPomp} package has been used to develop and demonstrate plug-and-play methodology for SpatPOMP models \citep{ionides22,ionides23,ning23-ibpf}.
+Scientific applications are starting to emerge \citep{zhang22,wheeler24,li24}.
 
 The remainder of this paper is organized as follows.
 \Cref{sec:background} defines mathematical notation for SpatPOMP models and relates this to their representation as objects of \class{\spatPomp} in the \pkg{\spatPomp} package.
@@ -471,7 +453,7 @@ The remainder of this paper is organized as follows.
 \Cref{sec:brownian} constructs a simple linear Gaussian SpatPOMP model and uses this example to illustrate statistical inference.
 \Cref{sec:measles} presents the construction of spatially structured compartment models for population dynamics, in the context of coupled measles dynamics in UK cities;
 this demonstrates the kind of nonlinear stochastic system primarily motivating the development of \pkg{\spatPomp}.
-Finally, \cref{sec:conclusion} discusses extensions and applications of \pkg{\spatPomp}.
+\cref{sec:conclusion} is a concluding discussion.
 
 
 \section{SpatPOMP models and their representation in spatPomp}
@@ -875,7 +857,7 @@ APF and the basic particle filter correspond to $\Ninter=1$, whereas choosing $\
           & \mbox{else}
           \end{array} \right.$
         \nllabel{alg:girf:weights}\;
-      log likelihood component,
+      log-likelihood component,
         $\loglikComponent_{\time,\ninter}=
           \log\Big(\Np^{-1}\,\sum_{\altNp=1}^{\Np}\!w^{\altNp}_{\time,\ninter}\Big)$\;
       normalized weights,
@@ -901,7 +883,7 @@ APF and the basic particle filter correspond to $\Ninter=1$, whereas choosing $\
   \;
   }
   \KwOut{
-    log likelihood,
+    log-likelihood,
       $\loglik^{\mbox{\tiny{GIRF}}}=
         \sum_{\time=0}^{\Time-1} \sum_{\ninter=1}^{\Ninter}
       \loglikComponent_{\time,\ninter}$, and
@@ -1016,7 +998,7 @@ The forecast spread around this deterministic prediction is given by the simulat
       }
   \KwOut{
     filter sample, $\vec{X}^{F,1:\Np}_{\time}$, for $n$ in $\seq{1}{N}$;
-    log likelihood estimate, $\loglik^{\mbox{\tiny{EnKF}}}=\sum_{\time=1}^{\Time} \loglik_{\time}$
+    log-likelihood estimate, $\loglik^{\mbox{\tiny{EnKF}}}=\sum_{\time=1}^{\Time} \loglik_{\time}$
   }
   \KwCplx{$\bigO(\Np\Unit\Time)$}
 \end{algorithm}
@@ -1093,7 +1075,7 @@ for $\np$ in $\seq{1}{\Np}$
     \;
 }%End timestep for Loop
 \KwOut{
-    log likelihood,
+    log-likelihood,
       $\loglik^{\mbox{\tiny{BPF}}}(\vectheta)= \sum_{\time=1}^{\Time}
         \sum_{\block=1}^{\Block}
 \log\Big(
@@ -1121,7 +1103,7 @@ For example, if there are 4 units, executing \code{bpfilter} with \code{block\_s
 \subsection[\ABF]{Adapted bagged filter (\ABF)}
 \label{sec:abf}
 
-The adapted bagged filter \citep{ionides21} combines many independent particle filters.
+The adapted bagged filter \citep{ionides23} combines many independent particle filters.
 This is called \emph{bagging}, (\emph{b}ootstrap \emph{agg}regat\emph{ing}), since a basic particle filter is also called a bootstrap filter.
 The adapted distribution is the conditional distribution of the latent process given its current value and the subsequent observation \citep{johansen08}.
 In the adapted bagged filter, each bootstrap replicate makes a Monte Carlo approximation to a draw from the adapted distribution.
@@ -1217,7 +1199,7 @@ $\displaystyle w^{\LCF,\rep,\np}_{\unit,\time}=
   $
   for $\unit$ in $\seq{1}{\Unit}$, $\time$ in $\seq{1}{\Time}$, $\rep$ in $\seq{1}{\Rep}$, $\np$ in $\seq{1}{\Np}$
   \nllabel{alg:abf:lf:weights} \;
-conditional log likelihood,
+conditional log-likelihood,
 ${\loglik}_{\unit,\time}=
   \log\left(
     \sum_{\rep=1}^{\Rep}\sum_{\np=1}^{\Np} w^{\LCF,\rep,\np}_{\unit,\time}
@@ -1230,7 +1212,7 @@ set $X^{\LCF,\np}_{\unit,\time} = {X}^{\IP,\rep,k}_{\unit,\time}$ with probabili
   \;
 \KwOut{
 filter particles, $\vec{X}^{\LCF,1:\Np}_{\time}$, for $\time$ in $\seq{1}{\Time}$;
-log likelihood, $\loglik^{\mbox{\tiny{ABF}}}= \sum_{\time=1}^\Time\sum_{\unit=1}^\Unit \loglik_{\unit,\time}$
+log-likelihood, $\loglik^{\mbox{\tiny{ABF}}}= \sum_{\time=1}^\Time\sum_{\unit=1}^\Unit \loglik_{\unit,\time}$
 }
   \KwCplx{$\bigO(\Rep \Np \Unit \Time)$}
 \end{algorithm}
@@ -1257,7 +1239,7 @@ example_nbhd <- function(object, unit, time){
 }
 @
 
-ABF can be combined with the guided intermediate resampling technique used by GIRF to give an algorithm called ABF-IR \citep{ionides21} implemented as \code{abfir}.
+ABF can be combined with the guided intermediate resampling technique used by GIRF to give an algorithm called ABF-IR \citep{ionides23} implemented as \code{abfir}.
 
 
 \subsection{Considerations for choosing a filter}
@@ -1269,9 +1251,9 @@ The choice of filter in a particular application is primarily an empirical quest
 Nevertheless, we offer some broad guidance.
 EnKF has low variance but is relatively sensitive to deviations from normality; in examples where this is not a concern, such as the example in ~\cref{sec:brownian}, EnKF can be expected to perform well.
 BPF can break conservation laws satisfied by the latent process, such as a constraint on the total population in all units;
-ABF satisfies such constraints but has been found to have higher variance than BPF on some benchmark problems \citep{ionides21}.
-For the measles model built by \code{measles()}, BPF and ABF have been found to perform better than EnKF and GIRF \citep{ionides21}.
-For the Lorenz-96 example built by \code{lorenz()}, GIRF and BPF perform well \citep{ionides21}.
+ABF satisfies such constraints but has been found to have higher variance than BPF on some benchmark problems \citep{ionides23}.
+For the measles model built by \code{measles()}, BPF and ABF have been found to perform better than EnKF and GIRF \citep{ionides23}.
+For the Lorenz-96 example built by \code{lorenz()}, GIRF and BPF perform well \citep{ionides23}.
 
 \section{Inference for SpatPOMP models}
 \label{sec:inference}
@@ -1279,8 +1261,7 @@ For the Lorenz-96 example built by \code{lorenz()}, GIRF and BPF perform well \c
 We focus on iterated filtering methods \citep{ionides15} which provide a relatively simple way to coerce filtering algorithms to carry out parameter inference, applicable to the general class of SpatPOMP models considered by \pkg{spatPomp}.
 The main idea of iterated filtering is to extend a POMP model to include dynamic parameter perturbations.
 Repeated filtering, with parameter perturbations of decreasing magnitude, approaches the maximum likelihood estimate.
-Here, we present iterated versions of GIRF, EnKF and the unadapted bagged filter (UBF), a version of ABF with $\Np=1$. These algorithms are known as {\iGIRF} \citep{park20}, {\iEnKF} \citep{li20} and {\iUBF} \citep{ionides21} respectively.
-We also discuss a recently proposed iterated block particle filter, IBPF \citep{ning21-ibpf,ionides22}.
+Here, we present iterated versions of GIRF, EnKF, BPF, and the unadapted bagged filter (UBF), a version of ABF with $\Np=1$. These algorithms are known as {\iGIRF} \citep{park20}, {\iEnKF} \citep{li20}, IBPF \citep{ning23-ibpf,ionides22} and {\iUBF} \citep{ionides23} respectively.
 SpatPOMP model estimation is an active area for research \citep[for example,][]{katzfuss20} and \pkg{spatPomp} provides a platform for developing new statistical methods and testing them on a range of models.
 
 \begin{algorithm}[p]
@@ -1437,7 +1418,7 @@ The \code{igirf} function permits perturbations to be carried out on a transform
 For regular parameters, i.e. parameters that are not related to the initial conditions of the dynamics, it may be appropriate to set the perturbation scale independent of $\time$.
 If parameters are transformed so that a unit scale is relevant, for example using a logarithmic transform for non-negative parameters, an appropriate default value is $\sigma_{\time,\thetadim}=0.02$.
 Initial value parameters (IVPs) are those that determine only the latent state at time $t_0$, and these should be perturbed only at the beginning of each iteration $\nit$.
-The matrix $\sigma_{0:\Time,1:\Thetadim}$ can be constructed using the \code{rw_sd} function, which simplifies the construction of the \code{rw.sd} argument for regular parameters and IVPs.
+The matrix $\sigma_{0:\Time,1:\Thetadim}$ can be constructed using the \code{rw\_sd} function, which simplifies the construction of the \code{rw.sd} argument for regular parameters and IVPs.
 The \code{cooling.fraction.50} argument takes the fraction of \code{rw.sd} by which to perturb the parameters after 50 iterations of \code{igirf}.
 If using the default geometric cooling schedule, a value of \code{cooling.fraction.50=0.5} means that the perturbation standard deviation decreases roughly 1\% per iteration.
 
@@ -1551,9 +1532,9 @@ In this case, if the average of the forecast ensemble is different from the obse
 In summary, EnKF and IEnKF are numerically convenient algorithms, but care is needed to check whether they are suitable when developing a new model.
 
 \subsection{Iterated block particle filter for parameter estimation}
-The success of \code{bpfilter} on a variety of spatiotemporal models \citep{ionides21} raises the question of how to extend a block particle filter for parameter estimation.
+The success of \code{bpfilter} on a variety of spatiotemporal models \citep{ionides23} raises the question of how to extend a block particle filter for parameter estimation.
 An iterated filtering algorithm accommodating the structure of the block particle filter was proposed by \citet{ionides22}.
-A previous proposal by \citet{ning21-ibpf} addresses the special case where all parameters are unit-specific.
+This generalizes the algorithm of \citet{ning23-ibpf} which addresses the special case where all parameters are unit-specific.
 These algorithms are implemented by \code{ibpf}, which requires a \code{spatPomp} model with the property that estimated parameters can be perturbed across units as well as through time.
 Therefore, any estimated parameter (whether shared or unit-specific) must be coded as a unit-specific parameter in order to apply this method.
 The spatiotemporal perturbations are used only as an optimization tool for model parameters which are fixed though time and space (for shared parameters) or just through time (for unit-specific parameters).
@@ -1562,7 +1543,7 @@ The algorithm uses decreasing perturbation magnitudes so that the perturbed mode
 An example model compatible with \code{ibpf} is constructed by the \code{he10()} function.
 This builds a measles model similar to the \code{measles()} example discussed in \cref{sec:measles}, with the difference that the user can select which parameters are unit-specific. 
 For further discussion of \code{ibpf}, and related questions about selecting shared versus unit-specific parameters, we refer the reader to \citet{ionides22}.
-A tutorial guide to \code{ibpf} is available on the \pkg{spatPomp} website \citep{ning22-tutorial}.
+A separate tutorial guide provides additional detail on the use of \code{ibpf} \citep{ning23-tutorial}.
 
 \subsection[Iterated UBF]{Iterated UBF for parameter estimation}
 \label{sec:iubf}
@@ -1634,7 +1615,7 @@ initialize parameters,
         \unitWeight_{\altUnit,\altTime}^{k,\rep}$
   \nllabel{alg:iabf:lp:weights} \nllabel{alg:iabf:end:n}
   \;
-  parameter log likelihoods, 
+  parameter log-likelihoods, 
   $\displaystyle r^{k}_{\time}= \sum_{\unit=1}^{\Unit}\mathrm{log} \Bigg(
     \frac{
       \sum_{\rep=1}^{\Rep}\unitWeight_{\unit,\time}^{k,\rep} \, \,
@@ -1671,7 +1652,7 @@ initialize parameters,
 
 Algorithm \ref{alg:iubf} describes the \code{iubf} function which carries out parameter estimation by iterating an unadapted bagged filter (UBF) with perturbed parameters.
 Note that UBF is the special case of ABF with $\Np=1$.
-UBF and IUBF were found to be effective on the measles model \citep{ionides21} and \code{iubf} was developed with this application in mind.
+UBF and IUBF were found to be effective on the measles model \citep{ionides23} and \code{iubf} was developed with this application in mind.
 This algorithm makes with $\ntheta$ copies of the parameter set, and iteratively perturbs the parameter set while evaluate a conditional likelihood at each observation time using UBF.
 In each observation time, IUBF selects perturbed parameter sets yielding the top $p$ quantile of the likelihoods.
 
@@ -1879,7 +1860,7 @@ CPU time is not necessarily the only relevant consideration, for example, when a
 By contrast, ABF has a high CPU requirement but it parallelizes easily to take advantage of distributed resources. 
 
 The time-complexity of GIRF is quadratic in $\Unit$, due to the intermediate time step loop shown in the pseudocode in \cref{sec:girf}, whereas the other algorithms scale linearly with $\Unit$ for a fixed algorithmic setting.
-However, a positive feature of GIRF is that it shares with PF the property that it targets the exact likelihood, i.e., it is consistent for the exact log likelihood as the number of particles grows and the Monte Carlo variance approaches zero.
+However, a positive feature of GIRF is that it shares with PF the property that it targets the exact likelihood, i.e., it is consistent for the exact log-likelihood as the number of particles grows and the Monte Carlo variance approaches zero.
 GIRF may be a practical algorithm when the number of units prohibits PF but permits effective use of GIRF.
 EnKF and BPF generally run the quickest and require the least memory.
 However, the Gaussian and independent blocks assumptions, respectively, of the two algorithms must be reasonable to obtain likelihood estimates with low bias.
@@ -1989,10 +1970,10 @@ The log-likelihood plotted in \cref{fig:bm_igirf_convergence2}, and that compute
 These should be recomputed to obtain a better estimate for the unperturbed model.
 Different likelihood evaluation methods can be applied, as shown in \cref{sec:loglik}, to investigate their comparative strengths and weaknesses.
 For \code{bm10}. the model is linear and Gaussian and so the maximum likelihood estimate of our model and the likelihood at this estimate can be found numerically using the Kalman filter.
-The maximum log likelihood is \Sexpr{myround(kf_ml,1)}, whereas the likelihood obtained by \code{ig1} is \Sexpr{round(ig1_loglik,1)}.
+The maximum log-likelihood is \Sexpr{myround(kf_ml,1)}, whereas the likelihood obtained by \code{ig1} is \Sexpr{round(ig1_loglik,1)}.
 This shortfall is a reminder that Monte Carlo optimization algorithms should usually be replicated, and should be used with inference methodology that accommodates Monte Carlo error, as discussed in \cref{sec:mcap}.
 
-<<bm_igirf_convergence2, echo = F, eval = T, fig.align = "center", out.width="65%",fig.width=6, fig.height=3.5, fig.cap=paste0(r"{The output of the \code{plot()} method on the object of \class{igirfd\_spatPomp} that encodes our model for correlated Brownian motions produces convergence traces for $\rho$, $\sigma$ and $\tau$, and the corresponding log likelihoods. Over }", ig1@Ngirf, r"{ iterations \code{igirf()} has allowed us to get within a neighborhood of the maximum likelihood.}")>>=
+<<bm_igirf_convergence2, echo = F, eval = T, fig.align = "center", out.width="65%",fig.width=6, fig.height=3.5, fig.cap=paste0(r"{The output of the \code{plot()} method on the object of \class{igirfd\_spatPomp} that encodes our model for correlated Brownian motions produces convergence traces for $\rho$, $\sigma$ and $\tau$, and the corresponding log-likelihoods. Over }", ig1@Ngirf, r"{ iterations \code{igirf()} has allowed us to get within a neighborhood of the maximum likelihood.}")>>=
 plot(ig1, params = c("rho", "sigma", "tau"), ncol = 2) +
  theme(axis.text.x = element_text(size = 12),
        axis.text.y = element_text(size = 12),
@@ -2053,7 +2034,7 @@ rho_prof <- bake(file = paste0(bm_files_dir,"rho-profile.rds"),{
 })
 @
 Above, calling \code{igirf} on \code{ig1} imports all the previous algorithmic settings except for those that we explicitly modify.
-Each row of \code{rho\_prof} now contains a parameter estimate its log likelihood, with $\rho$ values fixed along a grid.
+Each row of \code{rho\_prof} now contains a parameter estimate its log-likelihood, with $\rho$ values fixed along a grid.
 The MCAP 95\% confidence interval constructed by \code{mcap} uses \code{loess} to obtain a smoothed estimate of the profile likelihood function and then determines a confidence interval using by a cutoff based on the delta method applied to a local quadratic regression.
 This cutoff is typically slightly larger than the asymptotic 1.92 cutoff for a standard profile likelihood confidence interval constructed assuming error-free likelihood maximization and evaluation.
 <<bm_rho_prof_mcap>>=
@@ -2081,7 +2062,7 @@ This illustrates how \pkg{spatPomp} can accommodate various model features that 
 We then demonstrate explicitly how to construct a simplified version of this model.
 
 The \code{measles()} and \code{he10()} models are similar, but differ in details.
-For \code{measles()}, the data consist of biweekly counts and parameters are all shared between units, matching the analysis of \citet{park20} and \citet{ionides21}.
+For \code{measles()}, the data consist of biweekly counts and parameters are all shared between units, matching the analysis of \citet{park20} and \citet{ionides23}.
 For \code{he10()}, data are weekly and parameters can be shared or unit-specific, matching the analysis of \citet{he10} and \citet{ionides22}.
 We write the model for the general case where all parameters are unit-specific, noting that it is a relevant data analysis question to determine when parameter dependence on $\unit$ can be omitted.
 
@@ -2435,19 +2416,19 @@ In Figure~\ref{fig:measles_sim_plot}, we compare a simulation from \code{measles
 Epidemiological settings may be clearer when looking on the log scale, and so we use the \code{log=TRUE} argument to \code{plot()}.
 This figure shows some qualitative similarity between the simulations and the data, with opportunity for future work to investigate discrepancies.
 
-<<measles_sim_plot,fig.width=7, fig.height=3.5,out.width = '90%', fig.align='center',fig.show='hold',echo=F,eval=T,cache=F,fig.cap=r"{A: reported measles cases in two week intervals for the six largest cities in England, \code{plot(measles6,log=TRUE)}. B: simulated data, \code{plot(simulate(measles6),log=TRUE)}. The vertical scale is \code{log(cases+1)}.}">>=
+<<measles_sim_plot,fig.width=7, fig.height=3.5,out.width = '90%', fig.align='center',fig.show='hold',echo=F,eval=T,cache=F,fig.cap=r"{A: reported measles cases in two week intervals for the six largest cities in England, \code{plot(measles6,log=TRUE)}. B: simulated data, \code{plot(simulate(measles6),log=TRUE)}. The vertical scale is \code{log10(cases+1)}.}">>=
 
 measles_plot_data <- plot(measles6,log=TRUE) +
   labs(y="") +
   theme(axis.text.y=element_blank(),
     plot.margin = unit(c(0, 0, 0, 0), "cm")) +
-  ylim(0,8.5) +
+  ylim(0,4) +
   scale_x_continuous(breaks = c(1950,1960))
 
 measles_plot_sim <- plot(measles_sim,log=TRUE) +
   theme(axis.title.y=element_blank(),
     plot.margin=unit(c(0, 0, 0, 0), "cm")) +
-  ylim(0,8.5) +
+  ylim(0,4) +
   scale_x_continuous(breaks = c(1950,1960))
 
 prow <- plot_grid(
@@ -2469,10 +2450,9 @@ prow
 \label{sec:conclusion}
 
 The \pkg{\spatPomp} package is both a tool for data analysis based on SpatPOMP models and a principled computational framework for the ongoing development of inference algorithms.
-To date, \pkg{\spatPomp} has focused on algorithms with the plug-and-play property, but the package is designed to support new algorithms with and without this property.
+Although \pkg{\spatPomp} development has focused on algorithms with the plug-and-play property, it supports the development of new algorithms with and without this property.
 Current examples have emphasized biological metapopulation dynamics, but diverse applications fit into the SpatPOMP model class.
 Spatiotemporal data analysis using mechanistic models is a nascent topic, and future methodological developments are anticipated.
-Since the mission of \pkg{spatPomp} is to be a home for such analyses, the package developers welcome contributions and collaborations to further expand the functionality of \pkg{\spatPomp}.
 
 Complex models and large datasets can challenge available computational resources.
 With this in mind, key components of the \pkg{\spatPomp} package and associated models are written in \proglang{C}.
@@ -2482,14 +2462,14 @@ Two common computationally intensive tasks in \pkg{spatPomp} are the assessment 
 These tasks require only embarrassingly parallel computations and need no special discussion here.
 
 Practical modeling and inference for metapopulation systems, capable of handling scientifically motivated nonlinear, non-stationary stochastic models, is the last open problem of the challenges raised by \citet{bjornstad01}.
-Recent studies have reiterated the need for such methods, and made some progress toward attaining them \citep{becker16,li20}.
-The \pkg{\spatPomp} package offers new opportunities for the development and application of models, statistical methodology and data analysis workflows for model-based investigations of spatiotemporal systems.
+Recent studies have reiterated the scientific need for such methods \citep{becker16,li20}.
+Beyond the introduction provided by this tutorial, the case studies of \citet{wheeler24} and \citet{li24} provide source code describing \pkg{spatPomp} data analysis meeting this need.
 
 \section*{Acknowledgments}
 This work was supported by National Science Foundation grants DMS-1761603 and DMS-1646108, and National Institutes of Health grants 1-U54-GM111274 and 1-U01-GM110712.
-We appreciate constructive feedback received from anonymous editors and reviewers.
 We recognize those who have participated in the development and testing of \pkg{spatPomp}, especially Allister Ho, Zhuoxun Jiang, Jifan Li, Patricia Ning, Eduardo Ochoa, Rahul Subramanian and Jesse Wheeler.
 
+% \input{ms.bbl}
 \bibliography{bib-spatpomp}
 
 \end{document}

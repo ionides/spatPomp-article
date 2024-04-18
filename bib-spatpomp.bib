@@ -36,11 +36,11 @@
 @String{MWR          = {Monthly Weather Review}}
 @String{OUP          = {Oxford University Press}}
 @String{PLMS         = {Proceedings of the London Mathematical Society}}
-@String{PLoS-Bio     = {PLoS Biology}}
-@String{PLoS-CompBio = {PLoS Computational Biology}}
-@String{PLoS-Med     = {PLoS Medicine}}
-@String{PLoS-NTD     = {PLoS Neglected Tropical Diseases}}
-@String{PLoS-Path    = {PLoS Pathogens}}
+@String{PLoS-Bio     = {PLOS Biology}}
+@String{PLoS-CompBio = {PLOS Computational Biology}}
+@String{PLoS-Med     = {PLOS Medicine}}
+@String{PLoS-NTD     = {PLOS Neglected Tropical Diseases}}
+@String{PLoS-Path    = {PLOS Pathogens}}
 @String{PNAS         = {Proceedings of the National Academy of Sciences of the USA}}
 @String{PRSB         = {Proceedings of the Royal Society of London, Series B}}
 @String{PRSLA        = {Proceedings of the Royal Society of London, Series A}}
@@ -480,18 +480,16 @@ IIIIIIIIIII
   doi={10.1098/rsif.2017.0126}
 }
 
-@article{ionides21,
+@article{ionides23,
   author = {Edward L. Ionides and Kidus Asfaw and Joonha Park and Aaron A. King},
   title = {Bagged filters for partially observed interacting systems},
-  journal = {Journal of the American Statistical Association, pre-published online},
-  volume = {},
+  journal = JASA,
+  volume = {118},
   xnumber = {},
-  xpages = {1-33},
-  year  = {2021},
+  pages = {1078-1089},
+  year  = {2023},
   publisher = {Taylor & Francis},
-  doi = {10.1080/01621459.2021.1974867},
-  xURL = {https://doi.org/10.1080/01621459.2021.1974867},   
-  xeprint = {https://doi.org/10.1080/01621459.2021.1974867}  
+  doi = {10.1080/01621459.2021.1974867}
 }
 
 @article{ionides22,
@@ -634,11 +632,11 @@ LLLLLLLLLLLLLLLLLL
   publisher = {American Association for the Advancement of Science},
 }
 
-@Article{li23,
-  author = {Li, Jifan and Ionides, Edward L. and Ning, Ning},
-  journal={In preparation},
-  year={2023+},
-  title={Fitting metapopulation models to data: Why and how}
+@article{li24,
+  title={Inference on spatiotemporal dynamics for networks of biological populations},
+  author={Li, Jifan and Ionides, Edward L and King, Aaron A and Pascual, Mercedes and Ning, Ning},
+  journal={arXiv:2311.06702},
+  year={2024}
 }
 
 @article{lorenz96,
@@ -736,7 +734,7 @@ doi={10.3150/20-BEJ1321},
 pages={2532--2555}
 }
 
-@article{ning21-ibpf,
+@article{ning23-ibpf,
   title={Iterated block particle filter for high-dimensional parameter learning: Beating the curse of dimensionality},
   author={Ning, Ning and Ionides, Edward L},
   xjournal={arXiv:2110.10745v2},
@@ -747,15 +745,15 @@ pages={2532--2555}
   year={2023},
   volume={24},
   number={82},
-  pages={1--76},
-  year={2023}
+  pages={1--76}
 }
 
-@misc{ning22-tutorial,
+@misc{ning23-tutorial,
   title={Using an iterated block particle filter via spatPomp},
   author={Ning, Ning and Ionides, Edward L},
-  url={https://kidusasfaw.github.io/spatPomp/},
-  year={2022}
+  xurl={https://kidusasfaw.github.io/spatPomp/},
+  howpublished={{https://kidusasfaw.github.io/spatPomp/vignettes/ibpf.pdf}},
+  year={2023}
 }
 
 OOOOOOOOOOOOOOO
@@ -1013,11 +1011,12 @@ WWWWWWWWWWWWW
   publisher={National Acad Sciences}
 }
 
-@Article{wheeler23,
-  year={2023},
-  journal={Working draft at \rm{\url{https://ionides.github.io/pubs/wheeler23-draft.pdf}}},
-  title={Informing Policy via Dynamic Models: Eliminating Cholera in {H}aiti},
-  author={Wheeler, Jesse and Rosengart, AnnaElaine and Zhuxun, Jiang and Tan, Kevin Hao En and Treutle, Noah and Ionides, Edward L.},
+@article{wheeler24,
+  title={Informing policy via dynamic models: Cholera in {H}aiti},
+  author={Wheeler, Jesse and Rosengart, Anna and Jiang, Zhuoxun and Tan, Kevin and Treutle, Noah and Ionides, journal},
+  journal={To appear in PLOS Computational Biology},
+  url={https://arxiv.org/abs/2301.08979},
+  year={2024}
 }
 
 @Book{wickham2019advanced,
@@ -1051,4 +1050,16 @@ XXXXXXXXXXXXXX
 YYYYYYYYYYYYY
 
 ZZZZZZZZZZZZZZ
+
+@article{zhang22,
+  title={Mechanisms for the circulation of influenza {A} ({H3N2}) in {C}hina: A spatiotemporal modelling study},
+  author={Zhang, Bing and Huang, Weijuan and Pei, Sen and Zeng, Jinfeng and Shen, Wei and Wang, Daoze and Wang, Gang and Chen, Tao and Yang, Lei and Cheng, Peiwen and Wang, Dayan and Shu, Yuelong and Du, Xiangjun},
+  journal=PLoS-Path,
+  doi={10.1371/journal.ppat.1011046},
+  volume={18},
+  number={12},
+  pages={e1011046},
+  year={2022},
+  publisher={Public Library of Science San Francisco, CA USA}
+}
 

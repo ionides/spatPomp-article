@@ -1,5 +1,5 @@
 # README #
 
-This project develops an article about the spatPomp R package.
+This project develops a tutorial article introducing the spatPomp R package.
 
 

@@ -2030,7 +2030,9 @@ foreach (p=iter(pd,"row"),.combine=dplyr::bind_rows) %dopar% {
 
 <<bm_rho_prof_eval,eval=T,cache=F,echo=F>>=
 rho_prof <- bake(file = paste0(bm_files_dir,"rho-profile.rds"),{
-<<bm_rho_prof_code>> 
+<<bm_rho_prof_code>>
+attr(rho_prof,"cores") <- cores
+rho_prof
 })
 @
 Above, calling \code{igirf} on \code{ig1} imports all the previous algorithmic settings except for those that we explicitly modify.
@@ -2042,6 +2044,9 @@ rho_mcap <- mcap(rho_prof[,"loglik"],parameter=rho_prof[,"rho"])
 rho_mcap$ci
 @
 Note that the data in \code{bm10} are generated from a model with $\rho=0.4$.
+Even for this toy example, the profile likelihood confidence interval requires a non-trivial computational effort.
+This calculation took $\Sexpr{myround(attr(rho_prof,"system.time")["elapsed"]/60/60,1)}$ hours using $\Sexpr{attr(rho_prof,"cores")}$ cores.
+As a side-effect, the many searches involved in obtaining a profile likelihood ensure that the likelihood surface is extensively explored.
 
 \section[Measles model]{A spatiotemporal model of measles transmission}
 \label{sec:measles}

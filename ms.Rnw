@@ -182,8 +182,8 @@ edge[every join]#1(\tikzchaincurrent)\fi}}}
 
 %% code macros
 \newcommand\slot[1]{\code{#1}}
-\newcommand\class[1]{class `\code{#1}'}
-\newcommand\Class[1]{Class `\code{#1}'}
+\newcommand\class[1]{class \code{\textquotesingle #1\textquotesingle}}
+\newcommand\Class[1]{Class \code{\textquotesingle #1\textquotesingle}}
 
 %% customized math macros
 \newcommand\prob{\mathbb{P}}
@@ -254,8 +254,10 @@ options(
         scipen=2,
         help_type="html",
         stringsAsFactors=FALSE,
-        prompt="R> ",
-        continue="+  ",
+#        prompt="R> ",
+#        continue="+  ",
+        prompt="   ",
+        continue="   ",
         width=70,
         useFancyQuotes=FALSE,
         reindent.spaces=2,
@@ -707,7 +709,7 @@ A first step to explore a SpatPOMP model is to simulate stochastic realizations 
 This is carried out by \code{simulate()} which requires specification of \code{rprocess} and \code{rmeasure}.
 For example, \code{simulate(bm10)} produces a new object of \class{\spatPomp} for which the original data have been replaced with a simulation from the specified model.
 Unless a \code{params} argument is supplied, the simulation will be carried out using the parameter vector in \code{coef(bm10)}.
-Optionally, \code{simulate} can be made to return a \class{data.frame} object by supplying the argument \code{format=`data.frame'} in the call to \code{simulate}.
+Optionally, \code{simulate} can be made to return a \class{data.frame} object by supplying the argument \code{format="data.frame"} in the call to \code{simulate}.
 
 \section{Likelihood evaluation}
 \label{sec:filtering}
@@ -2238,8 +2240,8 @@ This is done using unit-specific IVPs, as discussed in Sections~\ref{subsec:init
 Here, the IVPs are \code{S1\_0}$,\dots,$\code{S6\_0}, \code{E1\_0},$\dots$,\code{E6\_0}, and \code{I1\_0},$\dots$,\code{I6\_0}.
 These code for the initial value of the corresponding states, \code{S1},$\dots$,\code{S6}, \code{E1},$\dots$,\code{E6}, and \code{I1},$\dots$,\code{I6}.
 Additional book-keeping states, \code{C1},$\dots$,\code{C6}, count accumulated cases during an observation interval and so are initialized to zero.
-The arguments \code{unit\_ivpnames = c('S','E','I')} and \code{unit\_statenames = c('S','E','I','C')} enable \code{spatPomp()} to expect these variables and define then as needed when compiling the Csnippets.
-Similarly, \code{unit\_covarnames = 'P'} declares the corresponding unit-specific population covariate.
+The arguments \code{unit\_ivpnames = c(\textquotesingle S\textquotesingle,\textquotesingle E\textquotesingle, \textquotesingle I\textquotesingle)} and \code{unit\_statenames = c(\textquotesingle S\textquotesingle,\textquotesingle E\textquotesingle,\textquotesingle I\textquotesingle,\textquotesingle C\textquotesingle)} enable \code{spatPomp()} to expect these variables and define then as needed when compiling the Csnippets.
+Similarly, \code{unit\_covarnames = \textquotesingle P\textquotesingle} declares the corresponding unit-specific population covariate.
 This is demonstrated in the following Csnippet specifying \code{rinit}.
 <<measles_rinit,echo=T, eval=T,cache=F>>=
 measles_rinit <- spatPomp_Csnippet(
@@ -2471,8 +2473,8 @@ Recent studies have reiterated the scientific need for such methods \citep{becke
 Beyond the introduction provided by this tutorial, the case studies of \citet{wheeler24} and \citet{li24} provide source code describing \pkg{spatPomp} data analysis meeting this need.
 
 \section*{Acknowledgments}
-This work was supported by National Science Foundation grants DMS-1761603 and DMS-1646108, and National Institutes of Health grants 1-U54-GM111274 and 1-U01-GM110712.
-We recognize those who have participated in the development and testing of \pkg{spatPomp}, especially Allister Ho, Zhuoxun Jiang, Jifan Li, Patricia Ning, Eduardo Ochoa, Rahul Subramanian and Jesse Wheeler.
+This tutorial was supported by National Science Foundation grants DMS-1761603 and DMS-1646108, and National Institutes of Health grants 1-U54-GM111274 and 1-U01-GM110712.
+We recognize those who have participated in the development and testing of \pkg{spatPomp}, especially Allister Ho, Zhuoxun Jiang, Jifan Li, Patricia Ning, Eduardo Ochoa, Rahul Subramanian and Jesse Wheeler. Ben Bolker provided feedback incorporated into this version of the article.
 
 % \input{ms.bbl}
 \bibliography{bib-spatpomp}

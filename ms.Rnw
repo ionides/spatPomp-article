@@ -642,6 +642,12 @@ This gives rise to a decomposition of the parameter vector, $\theta=(\theta_{\RP
 We may specify $f_{\vec{X}_0}(\vec{x}_0\giventh \theta_{\RP},\theta_{\IVP})$ to be a point mass at $\theta_{\IVP}$, in which case $\theta_{\IVP}$ exactly corresponds to $\vec{X}_0$.
 The \code{bm10} model has this structure, and the initialization can be tested by \code{rinit(bm10)}.
 The measles model of \cref{sec:measles:spatPomp} specifies $\vec{X}_0$ as a deterministic function of $\theta_{\IVP}$, but not an identity map since it is convenient to describe latent states as counts and the corresponding IVPs as proportions. 
+The RPs are provided to \code{rinit} so they can also participate in the initialization.
+
+For a stationary model, the initial state may be set at the stationary distribution by specifying $t_0$ sufficiently remote from $t_1$ to allow the system to equilibrate.
+\citet{stocks20} provides an example of this using \pkg{pomp}.
+When following this approach, the model is insensitive to the choice of $f_{\vec{X}_0}(\vec{x}_0\giventh\vectheta)$.
+
 
 \subsection{Parameters}
 \label{sec:params}
@@ -2429,16 +2435,15 @@ This figure shows some qualitative similarity between the simulations and the da
 <<measles_sim_plot,fig.width=7, fig.height=3.5,out.width = '90%', fig.align='center',fig.show='hold',echo=F,eval=T,cache=F,fig.cap=r"{A: reported measles cases in two week intervals for the six largest cities in England, \code{plot(measles6,log=TRUE)}. B: simulated data, \code{plot(simulate(measles6),log=TRUE)}. The vertical scale is \code{log10(cases+1)}.}">>=
 
 measles_plot_data <- plot(measles6,log=TRUE) +
-  labs(y="") +
   theme(axis.text.y=element_blank(),
     plot.margin = unit(c(0, 0, 0, 0), "cm")) +
-  ylim(0,4) +
+  scale_y_log10(limits=c(1,10^4)) +
   scale_x_continuous(breaks = c(1950,1960))
 
 measles_plot_sim <- plot(measles_sim,log=TRUE) +
   theme(axis.title.y=element_blank(),
     plot.margin=unit(c(0, 0, 0, 0), "cm")) +
-  ylim(0,4) +
+  scale_y_log10(limits=c(1,10^4)) +
   scale_x_continuous(breaks = c(1950,1960))
 
 prow <- plot_grid(

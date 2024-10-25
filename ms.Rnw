@@ -3,6 +3,7 @@
 \usepackage{fullpage}
 \usepackage{amsmath,amssymb}
 \usepackage{bbm} % for \mathbbm{1}
+\usepackage{textcomp}
 \graphicspath{{figure/}}
 
 \usepackage{natbib}
@@ -1666,7 +1667,8 @@ IF2 can be used to check the capabilities of newer and more scalable inference m
 Extensions for Bayesian inference of the currently implemented high-dimensional particle filter methods (GIRF, ABF, EnKF, BPF) are not yet available.
 Bayesian inference is available in \pkg{spatPomp} using the approximate Bayesian computing (ABC) method inherited from \pkg{pomp}, \code{abc()}.
 ABC has previously been used for spatiotemporal inference \citep{brown2018approximate} and can also serve as a baseline method.
-However, ABC is a feature-based method that may lose substantial information compared to full-information methods that work with the likelihood function rather than a summary statistic \citep{fasiolo16}.
+A related approach is the synthetic likelihood method of \cite{wood10} which can be implemented using \code{probe.match()}.
+However, ABC and synthetic likelihood are feature-based methods that may lose substantial information compared to full-information methods that work with the likelihood function rather than a summary statistic \citep{fasiolo16}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1949,8 +1951,9 @@ ig1
 \code{ig1} is an object of \class{igirfd\_spatpomp} which inherits from \class{girfd\_spatpomp}.
 A useful diagnostic of the parameter search is a plot of the change of the parameter estimates during the course of an \code{igirf()} run.
 Each iteration within an \code{igirf} run provides a parameter estimate and a likelihood evaluation at that estimate.
-The \code{plot} method for a \class{igirfd\_spatPomp} object shows the convergence record of parameter estimates and their likelihood evaluations.
-As shown in \cref{fig:bm_igirf_convergence2}, this \code{igirf} search has allowed us to explore the parameter space and climb significantly up the likelihood surface to within a small neighborhood of the maximum likelihood.
+The convergence record of parameter estimates and their likelihood evaluations is stored in the \code{traces} slot of the resulting \class{igirfd\_spatPomp} object. 
+The \code{plot} method for this class gives a graphical representation of the convergence traces, as shown in \cref{fig:bm_igirf_convergence2}.
+We see that this \code{igirf} search has allowed us to explore the parameter space and climb significantly up the likelihood surface to within a small neighborhood of the maximum likelihood.
 The search took \Sexpr{myround(attr(ig1,"system.time")["elapsed"]/60,1)} minutes on one CPU core for this example with \Sexpr{length(unit_names(bm10))} spatial units.
 Investigation of larger models may require multiple searches of the parameter space, started at various points, implemented using parallel runs of \code{igirf()}.
 
@@ -2038,7 +2041,7 @@ rho_prof
 })
 @
 Above, calling \code{igirf} on \code{ig1} imports all the previous algorithmic settings except for those that we explicitly modify.
-Each row of \code{rho\_prof} now contains a parameter estimate its log-likelihood, with $\rho$ values fixed along a grid.
+Each row of \code{rho\_prof} now contains a parameter estimate and its log-likelihood, with $\rho$ values fixed along a grid.
 The MCAP 95\% confidence interval constructed by \code{mcap} uses \code{loess} to obtain a smoothed estimate of the profile likelihood function and then determines a confidence interval using by a cutoff based on the delta method applied to a local quadratic regression.
 This cutoff is typically slightly larger than the asymptotic 1.92 cutoff for a standard profile likelihood confidence interval constructed assuming error-free likelihood maximization and evaluation.
 <<bm_rho_prof_mcap>>=
@@ -2096,7 +2099,7 @@ The dynamics of the latent state can be written in terms of flows between compar
 \displaystyle dI_\unit(t) &=& dN_{EI,\unit}(t) &-& dN_{IR,\unit}(t) &-& dN_{ID,\unit}(t)
 \end{array}\qquad\right\}\quad \mbox{for $\unit=1,\dots, \Unit$.}
 \]
-Here, $N_{SE,\unit}(t)$, $N_{EI,\unit}(t)$, and $N_{IR,\unit}(t)$ are counting process corresponding to the cumulative number of individuals transitioning between the compartments identified by the subscripts.
+Here, $N_{SE,\unit}(t)$, $N_{EI,\unit}(t)$, and $N_{IR,\unit}(t)$ are counting processes corresponding to the cumulative number of individuals transitioning between the compartments identified by the subscripts.
 The recruitment of susceptible individuals into city $\unit$ is denoted by the counting process $N_{BS,\unit}(t)$, primarily modeling births.
 Each compartment also has an outflow, written as a transition to $D$, primarily representing death, which occurs at a constant per-capita rate $\mu$.
 The number of recovered individuals $R_\unit(t)$ in city $\unit$ is defined implicitly from $P_{\unit}(t)=S_{\unit}(t)+E_{\unit}(t)+I_{\unit}(t)+R_{\unit}(t)$.
@@ -2193,7 +2196,7 @@ measles_covar$pop <- NULL
 measles_covarnames <- paste0(rep(c("P","lag_birthrate"),each=measles_U),1:measles_U)
 @
 
-We construction the model described in \cref{sec:measles-math-model} for the simplified situation where $\alpha_{\unit}=1$, $\measlesImmigration_{\unit}=0$ and $\cohort_{\unit}=0$.
+We construct the model described in \cref{sec:measles-math-model} for the simplified situation where $\alpha_{\unit}=1$, $\measlesImmigration_{\unit}=0$ and $\cohort_{\unit}=0$.
 All other parameters have shared value across units, except for the initial value parameters.
 A complete \pkg{spatPomp} representation of the model is provided in the source code for \code{he10()}.
 
@@ -2379,7 +2382,7 @@ measles_vunit_measure <- spatPomp_Csnippet("
 ")
 @
 
-It is convenient (but not necessary) to supply a parameter vector of scientific interest for testing the model.
+It is convenient (but not necessary) to supply a parameter vector for testing the model.
 Here, we use a parameter vector with duration of infection and latent period both set equal to one week, following \citet{xia04}, and the basic reproduction number set to $\Rzero{ } =30$.
 The gravitational constant, $g=1500$, was picked by qualitative visual matching of simulations.
 <<meales_sim_par,echo=T,eval=T>>=
